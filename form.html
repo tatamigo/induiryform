@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go！購！榻榻米 | 代購詢問、報價單</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 基本重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            max-width: 800px;
+            width: 100%;
+            padding: 50px;
+            margin-top: 20px;
+            position: relative; /* For popup positioning */
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        h1 img {
+            height: 50px;
+            width: auto;
+            vertical-align: middle;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 20px;
+        }
+
+        .form-section h2 {
+            font-size: 1.8em;
+            color: #FFB347;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #fcfcfc;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #66CC99;
+            box-shadow: 0 0 0 3px rgba(102, 204, 153, 0.2);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            display: inline-flex;
+            align-items: center;
+            font-size: 1.05em;
+            color: #444;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .radio-group input {
+            width: auto;
+            margin-right: 8px;
+            margin-bottom: 0;
+            transform: scale(1.2);
+            accent-color: #66CC99;
+        }
+
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #FFB347;
+            color: white;
+            font-size: 1.3em;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 40px;
+        }
+
+        .submit-button:hover {
+            background-color: #ffa52a;
+            transform: translateY(-2px);
+        }
+
+        .submit-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .form-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1em;
+            color: #666;
+            font-weight: 500;
+        }
+        .form-message.success {
+            color: #4CAF50;
+        }
+        .form-message.error {
+            color: #f44336;
+        }
+
+        /* --- Popup Styles --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup-content {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-content h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .popup-content p {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .popup-button {
+            padding: 12px 25px;
+            font-size: 1.05em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none; /* For anchor tags */
+            display: inline-block; /* For anchor tags */
+        }
+
+        .popup-button.new-form {
+            background-color: #66CC99;
+            color: white;
+        }
+
+        .popup-button.new-form:hover {
+            background-color: #5cb887;
+            transform: translateY(-2px);
+        }
+
+        .popup-button.homepage {
+            background-color: #FFB347;
+            color: white;
+        }
+
+        .popup-button.homepage:hover {
+            background-color: #ffa52a;
+            transform: translateY(-2px);
+        }
+
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 30px;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 30px;
+                gap: 10px;
+            }
+            h1 img {
+                height: 40px;
+            }
+            .form-section h2 {
+                font-size: 1.6em;
+            }
+            .form-group label {
+                font-size: 1em;
+            }
+            input,
+            textarea,
+            select {
+                padding: 12px;
+            }
+            .submit-button {
+                padding: 15px;
+                font-size: 1.1em;
+            }
+            .popup-content {
+                padding: 30px;
+            }
+            .popup-content h3 {
+                font-size: 1.6em;
+            }
+            .popup-content p {
+                font-size: 1em;
+            }
+            .popup-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .popup-button {
+                width: 80%;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 25px;
+                gap: 8px;
+            }
+            h1 img {
+                height: 30px;
+            }
+            .form-section h2 {
+                font-size: 1.4em;
+                margin-bottom: 20px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            .radio-group {
+                gap: 15px;
+            }
+            .popup-content {
+                padding: 25px;
+            }
+            .popup-content h3 {
+                font-size: 1.4em;
+            }
+            .popup-content p {
+                font-size: 0.9em;
+            }
+            .popup-button {
+                padding: 10px 20px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form class="form-container" id="inquiryForm" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdJn5W4KbueZ6gstoDCjfLw901-KuB1zr-2kCS23SmJ9jtDAQ/formResponse" method="POST" target="googleFormFrame">
+        <h1><img src="logo.png" alt="Go！購！榻榻米 Logo"> Go!購!榻榻米｜代購詢問、報價單</h1>
+
+        <div class="form-section">
+            <h2>Step 1: 基本資料</h2>
+            <div class="form-group">
+                <label for="nickname">您的暱稱：</label>
+                <input type="text" id="nickname" name="entry.392233934" required>
+            </div>
+
+            <div class="form-group">
+                <label>聯絡方式：</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="entry.1813795120" value="Line" required> Line</label>
+                    <label><input type="radio" name="entry.1813795120" value="IG"> IG</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="accountID">您的帳號 ID：(例如：Line ID / IG 帳號)</label>
+                <input type="text" id="accountID" name="entry.1253667219" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">您的 Email：</label>
+                <input type="email" id="email" name="entry.1330134666" required>
+            </div>
+
+            <div class="form-group">
+                <label>是否第一次下單？</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="entry.121449576" value="是" required> 是</label>
+                    <label><input type="radio" name="entry.121449576" value="否"> 否</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Step 2: 代購項目</h2>
+            <div class="form-group">
+                <label for="itemName">商品名稱：</label>
+                <input type="text" id="itemName" name="entry.819120518" required>
+            </div>
+
+            <div class="form-group">
+                <label for="brandName">品牌／店家名稱：</label>
+                <input type="text" id="brandName" name="entry.548305983">
+            </div>
+
+            <div class="form-group">
+                <label for="purchaseLink">購買連結：(請提供完整網址，若無請填「無」)</label>
+                <input type="url" id="purchaseLink" name="entry.32152364" placeholder="例如：https://item.rakuten.co.jp/... 或 填寫「無」" required>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">數量：</label>
+                <input type="number" id="quantity" name="entry.550056444" min="1" placeholder="例如：1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="specifications">規格：(顏色、尺寸、型號等，請詳細填寫)</label>
+                <input type="text" id="specifications" name="entry.718404377" placeholder="例如：M號 白色 / 藍色款 型號XYZ" required>
+            </div>
+
+            <div class="form-group">
+                <label for="itemNotes">備註：(例如：希望包裝完整、可接受的預算範圍、商品其他描述等)</label>
+                <textarea id="itemNotes" name="entry.323905556" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Step 3: 運送方式</h2>
+            <div class="form-group">
+                <label>運送方式：</label>
+                <select id="deliveryMethod" name="entry.1665316940" required>
+                    <option value="">請選擇運送方式</option>
+                    <option value="7-11 店到店">7-11 店到店</option>
+                    <option value="全家 店到店">全家 店到店</option>
+                    <option value="郵寄">郵寄</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>是否需要開箱檢查：(我們會拆封包裹檢查商品狀況，確保商品正確無損)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="entry.665912257" value="是" required> 是</label>
+                    <label><input type="radio" name="entry.665912257" value="否"> 否</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>是否需要原箱：(指原購買包裹箱，可能產生額外國際運費)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="entry.81836935" value="是" required> 是</label>
+                    <label><input type="radio" name="entry.81836935" value="否"> 否</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="shippingNotes">備註：(例如：指定店鋪名稱、郵局存局候領、特殊包裝需求等)</label>
+                <textarea id="shippingNotes" name="entry.1673282825" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Step 4: 送出</h2>
+            <div class="form-group">
+                <label>填入的資訊是否正確？</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="entry.1368985701" value="是" required> 是</label>
+                    <label><input type="radio" name="entry.1368985701" value="否"> 否</label>
+                </div>
+            </div>
+            <button type="submit" class="submit-button">送出表單 ✅</button>
+            <p id="formStatus" class="form-message">填寫完成後，我們會在24小時內與您聯繫！</p>
+        </div>
+    </form>
+
+    <iframe name="googleFormFrame" style="display:none;"></iframe>
+
+    <div class="popup-overlay" id="successPopup">
+        <div class="popup-content">
+            <h3>感謝您的填寫！</h3>
+            <p>您的代購詢問已成功送出！💕<br>榻榻米會在24小時內與您聯繫！🐾</p>
+            <div class="popup-buttons">
+                <a href="https://tatamigo.github.io/induiryform/" class="popup-button new-form">填寫新的表單</a>
+                <a href="https://tatamigo.github.io/homepage/" class="popup-button homepage">回首頁</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('inquiryForm');
+        const popup = document.getElementById('successPopup');
+        const googleFormFrame = document.querySelector('iframe[name="googleFormFrame"]');
+
+        form.addEventListener('submit', function(event) {
+            // Prevent default form submission to handle it via iframe and show popup
+            event.preventDefault();
+
+            // Submit the form to the hidden iframe
+            this.submit();
+
+            // Show the popup after a short delay to allow Google Form to process
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 500); // Adjust delay as needed
+        });
+
+        // You can add a listener to the iframe's load event if you need more precise timing
+        // However, for Google Forms, a short delay after submission usually works fine
+        googleFormFrame.onload = function() {
+            // This function will be called when the Google Form response is loaded in the iframe
+            // You can use this for more robust control if needed, but for simple popup, setTimeout is often enough.
+        };
+    </script>
+</body>
+</html>
